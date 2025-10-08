@@ -1,63 +1,85 @@
 <template>
-  <q-page class="q-pa-md">
-    <q-card class="q-pa-lg" style="max-width:640px; margin:auto">
-      <q-card-section>
-        <div class="text-h6">Student Basic Form</div>
-        <div class="text-subtitle2">Please fill in your details</div>
-      </q-card-section>
+  <div class="q-pa-md" style="max-width: 400px">
 
-      <q-card-section>
-        <q-form @submit.prevent="onSubmit" ref="formRef">
-          <q-input v-model="form.studentId" label="Student ID" outlined lazy-rules :rules="[val => !!val || 'Required']" />
-          <q-input v-model="form.firstName" label="First name" outlined class="q-mt-sm" :rules="[val => !!val || 'Required']" />
-          <q-input v-model="form.lastName" label="Last name" outlined class="q-mt-sm" :rules="[val => !!val || 'Required']" />
-          <q-input v-model="form.email" label="Email" type="email" outlined class="q-mt-sm" :rules="[val => /.+@.+\..+/.test(val) || 'Invalid email']" />
-          <div class="row q-mt-md">
-            <q-btn label="Submit" color="primary" type="submit" />
-            <q-btn label="Reset" flat class="q-ml-sm" @click="onReset" />
-          </div>
-        </q-form>
-      </q-card-section>
+    <q-form
+      @submit="onSubmit"
+      @reset="onReset"
+      class="q-gutter-md"
+    >
+      <q-input
+        filled
+        v-model="name"
+        label="Your name *"
+        hint="Name and surname"
+        lazy-rules
+        :rules="[ val => val && val.length > 0 || 'Please type something']"
+      />
 
-      <q-card-section v-if="submitted">
-        <div class="text-subtitle2">Submitted data</div>
-        <pre>{{ form }}</pre>
-      </q-card-section>
-    </q-card>
-  </q-page>
+      <q-input
+        filled
+        type="number"
+        v-model="age"
+        label="Your age *"
+        lazy-rules
+        :rules="[
+          val => val !== null && val !== '' || 'Please type your age',
+          val => val > 0 && val < 100 || 'Please type a real age'
+        ]"
+      />
+
+      <q-toggle v-model="accept" label="I accept the license and terms" />
+
+      <div>
+        <q-btn label="Submit" type="submit" color="primary"/>
+        <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" />
+      </div>
+    </q-form>
+
+  </div>
 </template>
 
-<script setup>
-import { ref, reactive } from 'vue'
+<script>
+import { useQuasar } from 'quasar'
+import { ref } from 'vue'
 
-const form = reactive({
-  studentId: '',
-  firstName: '',
-  lastName: '',
-  email: ''
-})
-const submitted = ref(false)
-const formRef = ref(null)
+export default {
+  setup () {
+    const $q = useQuasar()
 
-function onSubmit() {
-  submitted.value = true
-  // สำหรับทดสอบ Playwright เราเก็บค่าไว้ใน localStorage ด้วย
-  localStorage.setItem('studentForm', JSON.stringify(form))
-}
+    const name = ref(null)
+    const age = ref(null)
+    const accept = ref(false)
 
-function onReset() {
-  form.studentId = ''
-  form.firstName = ''
-  form.lastName = ''
-  form.email = ''
-  submitted.value = false
+    return {
+      name,
+      age,
+      accept,
+
+      onSubmit () {
+        if (accept.value !== true) {
+          $q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'warning',
+            message: 'You need to accept the license and terms first'
+          })
+        }
+        else {
+          $q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'cloud_done',
+            message: 'Submitted'
+          })
+        }
+      },
+
+      onReset () {
+        name.value = null
+        age.value = null
+        accept.value = false
+      }
+    }
+  }
 }
 </script>
-
-<style scoped>
-pre {
-  background: #f5f5f7;
-  padding: 0.5rem;
-  border-radius: 6px;
-}
-</style>
