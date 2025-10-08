@@ -187,9 +187,9 @@ export default defineConfig((/* ctx */) => {
       },
 
       builder: {
-        publicPath: '/330_tewin_chanchai/',
+        publicPath: '/6704101330-tewin-chanchai/',
 
-        appId: '330-tewin-chanchai',
+        appId: '6704101330-tewin-chanchai',
       },
     },
 
